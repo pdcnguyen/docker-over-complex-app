@@ -1,4 +1,6 @@
 sudo: required
+language: generic
+
 services:
   - docker
 
@@ -6,15 +8,16 @@ before_install:
   - docker build -t pdcnguyen/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run pdcnguyen/react-test npm test -- --coverage
+  - docker run -e CI=true pdcnguyen/react-test npm test
 
 after_success:
   - docker build -t pdcnguyen/multi-client ./client
   - docker build -t pdcnguyen/multi-nginx ./nginx
   - docker build -t pdcnguyen/multi-server ./server
   - docker build -t pdcnguyen/multi-worker ./worker
-  #Log in docker
+  # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
   - docker push pdcnguyen/multi-client
   - docker push pdcnguyen/multi-nginx
   - docker push pdcnguyen/multi-server
